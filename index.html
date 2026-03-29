@@ -434,7 +434,8 @@
             try {
                 const resp = await fetch(APPS_SCRIPT_URL, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    redirect: "follow",
+                    headers: { "Content-Type": "text/plain" }, 
                     body: JSON.stringify({
                         tipo: tipoEvento,
                         data: oggi.toISOString().split("T")[0],

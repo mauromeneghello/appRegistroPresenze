@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a1a2e">
+    <title>Presenze</title>
+    <style>
+        :root {
+            --accent: #4f8ef7;
+            --bg: #0f0f1a;
+            --card: #1c1c2e;
+            --text: #f0f0f0;
+            --muted: #888;
+            --green: #3ecf8e;
+            --red: #e55353;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 16px 48px;
+            gap: 20px;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .tipo-toggle {
+            display: flex;
+            gap: 10px;
+        }
+
+        .tipo-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            background: #2a2a3e;
+            color: var(--muted);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            text-align: center;
+        }
+
+        .tipo-btn.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(79, 142, 247, 0.1);
+        }
+
+        .mic-btn {
+            width: 100%;
+            max-width: 420px;
+            height: 120px;
+            border-radius: 20px;
+            border: 2px solid #333;
+            font-size: 42px;
+            cursor: pointer;
+            background: #1c1c2e;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .mic-btn.listening {
+            background: rgba(229, 83, 83, 0.15);
+            border-color: var(--red);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(229, 83, 83, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 0 0 16px rgba(229, 83, 83, 0);
+            }
+        }
+
+        .mic-label {
+            font-size: 14px;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .mic-btn.listening .mic-label {
+            color: var(--red);
+        }
+
+        .transcript-box {
+            background: #12121e;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 15px;
+            color: var(--text);
+            min-height: 56px;
+            line-height: 1.5;
+            border: 1px solid #2a2a3e;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .transcript-box.empty {
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .result-section {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .result-section h3 {
+            font-size: 13px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chip {
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .chip.presente {
+            background: rgba(62, 207, 142, 0.15);
+            color: var(--green);
+        }
+
+        .chip.assente {
+            background: rgba(229, 83, 83, 0.15);
+            color: var(--red);
+        }
+
+        .send-btn {
+            width: 100%;
+            max-width: 420px;
+            padding: 16px;
+            border-radius: 14px;
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity .2s;
+        }
+
+        .send-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .status-msg {
+            font-size: 14px;
+            text-align: center;
+            padding: 10px 16px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .status-msg.ok {
+            background: rgba(62, 207, 142, 0.15);
+            color: var(--green);
+        }
+
+        .status-msg.err {
+            background: rgba(229, 83, 83, 0.15);
+            color: var(--red);
+        }
+
+        .status-msg.loading {
+            background: rgba(79, 142, 247, 0.1);
+            color: var(--accent);
+        }
+
+        .divider {
+            width: 100%;
+            max-width: 420px;
+            height: 1px;
+            background: #2a2a3e;
+        }
+
+        #loading-nomi {
+            font-size: 13px;
+            color: var(--muted);
+            text-align: center;
+            width: 100%;
+            max-width: 420px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>⚽ Registro Presenze</h1>
+    <p class="subtitle" id="data-oggi"></p>
+
+    <div class="card">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">Tipo
+            evento</p>
+        <div class="tipo-toggle">
+            <button class="tipo-btn active" id="btn-all" onclick="setTipo('allenamento')">🏃 Allenamento</button>
+            <button class="tipo-btn" id="btn-par" onclick="setTipo('partita')">🏆 Partita</button>
+        </div>
+    </div>
+
+    <p id="loading-nomi">⏳ Caricamento rosa dal foglio...</p>
+
+    <button class="mic-btn" id="mic-btn" onclick="toggleRec()" disabled>
+        <span id="mic-icon">🎙️</span>
+        <span class="mic-label" id="mic-label">In attesa della rosa...</span>
+    </button>
+
+    <div class="transcript-box empty" id="transcript">Parla dopo aver premuto il microfono...</div>
+
+    <div class="divider"></div>
+
+    <div class="result-section" id="result-section" style="display:none">
+        <div style="margin-bottom:14px">
+            <h3>🔴 Assenti rilevati</h3>
+            <div class="chips" id="chips-assenti"></div>
+        </div>
+        <div>
+            <h3>🟢 Presenti</h3>
+            <div class="chips" id="chips-presenti"></div>
+        </div>
+    </div>
+
+    <button class="send-btn" id="send-btn" disabled onclick="invia()">Salva sul foglio Google</button>
+
+    <div class="status-msg" id="status-msg" style="display:none"></div>
+
+    <script>
+        // ============================================================
+        // UNICA COSA DA CONFIGURARE — incolla l'URL del tuo Apps Script
+        // ============================================================
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby_7qBlBVUknz5iPAKwk_jEvh5tCySpKuS5_bB-Lx9FotEZX357rjyEkT4d8hPsCIFHpA/exec";
+        // ============================================================
+
+        let tipoEvento = "allenamento";
+        let recognition = null;
+        let listening = false;
+        let assentiRilevati = [];
+        let trascrizioneFull = "";
+        let NOMI_RAGAZZI = []; // caricati dinamicamente
+
+        const oggi = new Date();
+        document.getElementById("data-oggi").textContent =
+            oggi.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+        // Carica i nomi dal foglio Google all'avvio
+        async function caricaNomi() {
+            try {
+                const resp = await fetch(APPS_SCRIPT_URL);
+                const json = await resp.json();
+                if (!json.success) throw new Error(json.error);
+
+                NOMI_RAGAZZI = json.nomi;
+                document.getElementById("loading-nomi").textContent =
+                    `✅ Rosa caricata: ${NOMI_RAGAZZI.length} ragazzi`;
+
+                const btn = document.getElementById("mic-btn");
+                btn.disabled = false;
+                document.getElementById("mic-label").textContent = "Tocca per registrare";
+
+            } catch (err) {
+                document.getElementById("loading-nomi").textContent =
+                    "❌ Errore caricamento rosa. Ricarica la pagina.";
+                document.getElementById("loading-nomi").style.color = "var(--red)";
+            }
+        }
+
+        caricaNomi();
+
+        function setTipo(t) {
+            tipoEvento = t;
+            document.getElementById("btn-all").classList.toggle("active", t === "allenamento");
+            document.getElementById("btn-par").classList.toggle("active", t === "partita");
+        }
+
+        function toggleRec() {
+            if (!listening) startRec();
+            else stopRec();
+        }
+
+        function startRec() {
+            if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
+                mostraStatus("Usa Chrome su Android per il riconoscimento vocale.", "err");
+                return;
+            }
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SR();
+            recognition.lang = "it-IT";
+            recognition.continuous = true;
+            recognition.interimResults = true;
+
+            trascrizioneFull = "";
+
+            recognition.onresult = (e) => {
+                let interim = "";
+                for (let i = e.resultIndex; i < e.results.length; i++) {
+                    if (e.results[i].isFinal) trascrizioneFull += e.results[i][0].transcript + " ";
+                    else interim += e.results[i][0].transcript;
+                }
+                const el = document.getElementById("transcript");
+                el.textContent = trascrizioneFull + interim || "Sto ascoltando...";
+                el.classList.remove("empty");
+            };
+
+            recognition.onend = () => { if (listening) recognition.start(); };
+            recognition.onerror = (e) => {
+                if (e.error !== "no-speech") { mostraStatus("Errore microfono: " + e.error, "err"); stopRec(); }
+            };
+
+            recognition.start();
+            listening = true;
+            document.getElementById("mic-btn").classList.add("listening");
+            document.getElementById("mic-icon").textContent = "⏹️";
+            document.getElementById("mic-label").textContent = "Registrazione in corso — tocca per fermare";
+            document.getElementById("status-msg").style.display = "none";
+        }
+
+        function stopRec() {
+            if (recognition) recognition.stop();
+            listening = false;
+            document.getElementById("mic-btn").classList.remove("listening");
+            document.getElementById("mic-icon").textContent = "🎙️";
+            document.getElementById("mic-label").textContent = "Tocca per registrare";
+            if (trascrizioneFull.trim()) analizzaTrascrizione(trascrizioneFull.trim());
+        }
+
+        function normalizza(str) {
+            return str.toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^a-z0-9 ]/g, "")
+                .trim();
+        }
+
+        function matchNome(testo, nome) {
+            const parti = normalizza(nome).split(" ");
+            const testoN = normalizza(testo);
+            return parti.some(p => p.length > 2 && testoN.includes(p));
+        }
+
+        function analizzaTrascrizione(testo) {
+            assentiRilevati = NOMI_RAGAZZI.filter(n => matchNome(testo, n));
+            const presenti = NOMI_RAGAZZI.filter(n => !assentiRilevati.includes(n));
+
+            document.getElementById("result-section").style.display = "block";
+
+            const chipsA = document.getElementById("chips-assenti");
+            const chipsP = document.getElementById("chips-presenti");
+            chipsA.innerHTML = "";
+            chipsP.innerHTML = "";
+
+            if (assentiRilevati.length === 0) {
+                chipsA.innerHTML = '<span style="color:var(--muted);font-size:13px">Nessuno rilevato come assente</span>';
+            } else {
+                assentiRilevati.forEach(n => {
+                    const c = document.createElement("div");
+                    c.className = "chip assente";
+                    c.textContent = n;
+                    c.title = "Tocca per segnare come presente";
+                    c.onclick = () => { assentiRilevati = assentiRilevati.filter(x => x !== n); c.remove(); aggiungiChipPresente(n); };
+                    chipsA.appendChild(c);
+                });
+            }
+
+            presenti.forEach(n => aggiungiChipPresente(n));
+            document.getElementById("send-btn").disabled = false;
+        }
+
+        function aggiungiChipPresente(nome) {
+            const c = document.createElement("div");
+            c.className = "chip presente";
+            c.textContent = nome;
+            document.getElementById("chips-presenti").appendChild(c);
+        }
+
+        async function invia() {
+            const btn = document.getElementById("send-btn");
+            btn.disabled = true;
+            mostraStatus("Salvataggio in corso...", "loading");
+
+            try {
+                const resp = await fetch(APPS_SCRIPT_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        tipo: tipoEvento,
+                        data: oggi.toISOString().split("T")[0],
+                        assenti: assentiRilevati
+                    })
+                });
+                const json = await resp.json();
+                if (json.success) {
+                    mostraStatus(`✅ Salvato! Assenti: ${assentiRilevati.length || "nessuno"}`, "ok");
+                    setTimeout(resetUI, 3000);
+                } else {
+                    mostraStatus("❌ Errore: " + json.error, "err");
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                mostraStatus("❌ Connessione fallita. Riprova.", "err");
+                btn.disabled = false;
+            }
+        }
+
+        function resetUI() {
+            document.getElementById("transcript").textContent = "Parla dopo aver premuto il microfono...";
+            document.getElementById("transcript").classList.add("empty");
+            document.getElementById("result-section").style.display = "none";
+            document.getElementById("send-btn").disabled = true;
+            trascrizioneFull = "";
+            assentiRilevati = [];
+        }
+
+        function mostraStatus(msg, tipo) {
+            const el = document.getElementById("status-msg");
+            el.textContent = msg;
+            el.className = "status-msg " + tipo;
+            el.style.display = "block";
+        }
+    </script>
+</body>
+
+</html>

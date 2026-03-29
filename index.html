@@ -534,7 +534,6 @@
                 const resp = await fetch(APPS_SCRIPT_URL, {
                     method: "POST",
                     redirect: "follow",
-                    headers: authHeaders(),
                     body: JSON.stringify({
                         idtoken: googleAccessToken,
                         tipo: tipoEvento,
